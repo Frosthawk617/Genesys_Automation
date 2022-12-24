@@ -13,7 +13,7 @@ Hooks.on('getActorSheetHeaderButtons',(sheet, buttons)=>{
 });
 
 async function main(target){
-    const pack = game.packs.get("genesys-talent-compendiums.gcrb-talents");
+    const pack = game.packs.get("world.npc-talents");
     const Characs = [
         {
             "name": "Small Creature",
@@ -1072,7 +1072,7 @@ async function main(target){
         },
         button2:{
           label: "Export",
-          callback: Move.startExport()
+          callback: ()=>{Move.startExport()}
         }
       },
       default: "button1"
@@ -1175,7 +1175,7 @@ async function main(target){
     }
     
     async function buildPage4() {
-        var talents = game.packs.get("genesys-talent-compendiums.gcrb-talents").index.contents;
+        var talents = game.packs.get("world.npc-talents").index.contents;
         var page = '';
         var i = 0;
         for (var t = 0; t < talents.length; t++) {
@@ -1441,7 +1441,7 @@ const armData={
     class Move{
       
       static startExport() {
-        var content = Move.buildPage1();
+        var content = Move.exportPage();
           new Dialog({
               title: "Export items to Item Directory",
               content: content,
@@ -1466,7 +1466,7 @@ const armData={
           }).render(true);
       }
       
-          static buildPage1() {
+          static exportPage() {
             const target = canvas.tokens.controlled[0].actor;
             const items = target.data.items.contents;
             var page = '';
