@@ -1,0 +1,32 @@
+{
+	"id": "gen_auto",
+	"name": "___Genesys_Automation",
+	"title": "Genesys_Automation",
+	"description": "Automates medicine checks and basic damage dealing.",
+	"version": "0.1.1",
+	"author": "Frosthawk",
+	"esmodules": [
+		"./scripts/AutoDamage.js",
+		"./scripts/heallazy.js",
+		"./scripts/NPC_Gen.js",
+		"./scripts/booster.js",
+		"./scripts/boostToNext.js"
+	],
+	"styles": [],
+	"packs": [
+		{
+			"name": "genesys_automation",
+			"label": "GenesysAutomation",
+			"path": "packs/genesysautomation.db",
+			"entity": "Macro",
+			"module": "___Genesys_Automation"
+		  }
+	],
+	"minimumCoreVersion": 9,
+	"socket": "true",
+	"compatibility": {
+		"minimum": 7,
+		"verified": 7,
+		"maximum": 10
+	}
+}
