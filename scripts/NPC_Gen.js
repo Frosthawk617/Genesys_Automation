@@ -36,7 +36,8 @@ game.settings.register('___Genesys_Automation','SkillList',{name:"Actor to Pull 
 
 
 Hooks.on('getActorSheetHeaderButtons',(sheet, buttons)=>{
-    const target = (sheet.actor);
+  const target = (sheet.actor);
+    console.log(target);
     if (game.user.isGM) {
     buttons.unshift({
         class: 'gen-button',
@@ -48,8 +49,10 @@ Hooks.on('getActorSheetHeaderButtons',(sheet, buttons)=>{
     });
     }
 });
+
+
 var customSkillPackage = [];
-async function main(target){
+async function main(target, doc){
   var setPack =game.settings.get('___Genesys_Automation','TalentPack');
   var pack = game.packs.get("world."+setPack+"");
     const Characs = [
@@ -1032,8 +1035,8 @@ async function main(target){
             var selectedChar = Characs.find(x=>x.id === checkedID);
             } else {console.log("No char selected");}
             nextDialogue("Defense",page2Final,(html) => {
+              var type = $(html).find("#type").val();
               if (typeof $(html).find(".defence:checkbox:checked")[0] != "undefined") {
-                var type = $(html).find("#type").val();
                 var checkedIDArray = []; 
                 for (var i =0; i < $(html).find(".defence:checkbox:checked").length; i++) {
                 checkedIDArray.push($(html).find(".defence:checkbox:checked")[i].id);
@@ -1290,79 +1293,40 @@ async function main(target){
           } 
     
     async function updateActor(selectedChar, selectedDefArray, selectedSkills, type, talentIds, selectedWepPack, custPackObj){
+console.log(type);
 
-        if (typeof selectedChar != "undefined") {
-        // Attributes------------------------------------
-        target.update({ "data.attributes.Brawn.value": selectedChar.characs.brawn });
-        target.update({ "data.attributes.Agility.value": selectedChar.characs.agility });
-        target.update({ "data.attributes.Intellect.value": selectedChar.characs.intellect });
-        target.update({ "data.attributes.Cunning.value": selectedChar.characs.cunning });
-        target.update({ "data.attributes.Willpower.value": selectedChar.characs.willpower });
-        target.update({ "data.attributes.Presence.value": selectedChar.characs.presence });
-        } else {console.log("No Chars selected");}
-        //Defence-----------------------------------------
-        if (typeof selectedDefArray != "undefined" || typeof type != "undefined") {
-        if (type === "minion") {
-            var wound = 5;
-            var strain = 0 + selectedChar.characs.willpower;
-        } else if ( type === "rival") {
-            var wound = 8;
-            var strain = 0 + selectedChar.characs.willpower;
-        } else {
-            var wound = 12;
-            var strain = 10 + selectedChar.characs.willpower; 
-        }
-      
-        for (var y = 0; y < selectedDefArray.length; y++) {
-        let key = Object.keys(selectedDefArray[y].defense);
-        let value = Object.values(selectedDefArray[y].defense);
-        for (var i = 0; i < key.length; i++) {
-    
-            switch (key[i]) {
-                case "wound threshold":
-                    wound += value[i];
-                    break;
-                case "strain threshold":
-                    strain += value[i]
-                    break;
-                case "soak":
-                    target.update({'data.attributes.Soak.value': value[i]});
-                    break;    
-                case "melee defense":
-                    break;    
-                case "ranged defense":
-                    target.update({'data.attributes.Defence-Ranged.value': value[i]});
-                    break;    
-                default:
-                    break;
-            }
-            if (target.data.type === "minion") {
-                var minorChar = "data.unit_wounds.value"
-            } else {
-                var minorChar = "data.attributes.Wounds.value"
-            }
-    target.update({[`${minorChar}`]: wound});
-    target.update({'data.attributes.Strain.value': strain});
-        }
-    
-        }
-      } else {console.log("No Def to update");}
     //Skills
-
-
     if (typeof selectedSkills != "undefined") {
       console.log(selectedSkills);
     let skillKey = Object.keys(selectedSkills.skills);
   console.log(skillKey);
     let skillValue = Object.values(selectedSkills.skills)
     console.log(skillValue);
+    if(type === 'minion') {var careertype = "talent"} else {var careertype= "career"}
+    var career = {
+      name: selectedSkills.name,
+      type: "talent",
+      data: {
+        attributes:{
+
+        }
+      }
+    }
     for (let s = 0; s < skillKey.length; s++) {
       if (game.settings.get('___Genesys_Automation','CustSkillPackage')) {
         var skillLoc = skillKey[s];
       } else {
         var skillLoc = capitalizeFirstLetter(skillKey[s]);}
-        console.log(skillLoc,skillValue[s]);
-        target.update({[`data.attributes.${skillLoc}.value`]: skillValue[s]});
+        if (target.type==='minion') {
+        var group = $(document).find('input[name="data.skills.'+skillLoc+'.groupskill"]');
+        await group.click();
+       console.log(group);
+        } else {
+        var car = $(document).find('input[name="data.skills.'+skillLoc+'.careerskill"]');
+        console.log(car);
+       await car.click();
+       await target.update({[`data.attributes.${skillLoc}.value`]: skillValue[s]});
+        }
     }
   } else {console.log("No skills to update");}
     
@@ -1384,8 +1348,8 @@ async function main(target){
     console.log("no talents to update");
   }
 /// Weps
+if (typeof selectedWepPack === "undefined" && typeof cusPackObj === "undefined") {} else {
 if (typeof selectedWepPack === "undefined"){
-  if (typeof custPackObj.equipment.weapons.weapon[0] === "undefined"){ }else
   var selectedWep = custPackObj.equipment.weapons;
 } else {
  var selectedWep = selectedWepPack.equipment.weapons;
@@ -1403,7 +1367,7 @@ for (let w = 0; w < selectedWep.length; w++) {
     var skill = "Melee";
   } else if (element.skill ==="Melee [Light]") {
     var skill = "Melee";
-  }else {var skill = element}
+  }else {var skill = element.skill}
   
 const wepData={
     name: element.weapon,
@@ -1441,21 +1405,8 @@ const wepData={
 
   
   await target.createEmbeddedDocuments('Item', [wepData])
+  console.log(wepData);
 }
-var mActor = target;
-const wait = async (ms) => new Promise((resolve)=> setTimeout(resolve, ms));
-(async () => {
-   for (let i of mActor.itemTypes.weapon) {
-	await i.sheet.render(true);
-
-}
-    await wait(200)
-    //continue to do things after a 200ms wait.
-	for (let i of mActor.itemTypes.weapon) {	
-	let toClose = Object.values(ui.windows).find(w => w.constructor.name === 'ItemSheetFFG' && w.title == i.name);
-	if (toClose) toClose.close();
-	}
-})();
 
 if (typeof selectedWepPack === "undefined") {
 var selectedArm = custPackObj.equipment.armour;
@@ -1484,13 +1435,83 @@ const armData={
     }
     }
 }
-  
-  await target.createEmbeddedDocuments('Item', [armData])
+  if (typeof element.name != "undefined") {
+  await target.createEmbeddedDocuments('Item', [armData])}
   console.log(armData);
   
 }
     }
-  
+    if (typeof selectedChar != "undefined") {
+      // Attributes------------------------------------
+      target.update({ "data.attributes.Brawn.value": selectedChar.characs.brawn });
+      target.update({ "data.attributes.Agility.value": selectedChar.characs.agility });
+      target.update({ "data.attributes.Intellect.value": selectedChar.characs.intellect });
+      target.update({ "data.attributes.Cunning.value": selectedChar.characs.cunning });
+      target.update({ "data.attributes.Willpower.value": selectedChar.characs.willpower });
+      target.update({ "data.attributes.Presence.value": selectedChar.characs.presence });
+      } else {console.log("No Chars selected");}
+
+              //Defence-----------------------------------------
+              console.log(selectedChar);
+              if(typeof selectedChar ==="undefined") {var will = target.data.data.characteristics.Willpower.value;} else {var will = selectedChar.characs.willpower;}
+              if (type === "minion") {
+                var wound = 5;
+                var strain = 0 + will;
+            } else if ( type === "rival") {
+                var wound = 8;
+                var strain = 0 + will;
+            } else {
+                var wound = 12;
+                var strain = 10 + will; 
+            }
+            if (typeof selectedDefArray === "undefined"){
+              if (target.data.type === "minion") {
+                var minorChar = "data.unit_wounds.value"
+            } else {
+                var minorChar = "data.attributes.Wounds.value"
+            }
+      target.update({[`${minorChar}`]: wound});
+      target.update({'data.attributes.Strain.value': strain});
+            }
+      
+      
+              if (typeof selectedDefArray != "undefined") {
+              for (var y = 0; y < selectedDefArray.length; y++) {
+              let key = Object.keys(selectedDefArray[y].defense);
+              let value = Object.values(selectedDefArray[y].defense);
+              for (var i = 0; i < key.length; i++) {
+          
+                  switch (key[i]) {
+                      case "wound threshold":
+                          wound += value[i];
+                          break;
+                      case "strain threshold":
+                          strain += value[i]
+                          break;
+                      case "soak":
+                          target.update({'data.attributes.Soak.value': value[i]});
+                          break;    
+                      case "melee defense":
+                          break;    
+                      case "ranged defense":
+                          target.update({'data.attributes.Defence-Ranged.value': value[i]});
+                          break;    
+                      default:
+                          break;
+                  }
+                  if (target.data.type === "minion") {
+                      var minorChar = "data.unit_wounds.value"
+                  } else {
+                      var minorChar = "data.attributes.Wounds.value"
+                  }
+          target.update({[`${minorChar}`]: wound});
+          target.update({'data.attributes.Strain.value': strain});
+              }
+          
+              }
+            } else {}
+
+    }
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
       }
