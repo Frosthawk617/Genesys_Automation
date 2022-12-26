@@ -1,3 +1,39 @@
+Hooks.on('init',()=>{
+  const compArray = game.data.packs;
+  const talentChoices = {};
+  for (let i = 0; i < compArray.length; i++) {
+    const element = compArray[i];
+console.log(element);
+    var key = element.name;
+    var label = element.label;
+    talentChoices[key] = label;
+  }
+
+  const actorArray = game.data.actors;
+  const actorChoices = {};
+  for (let i = 0; i < actorArray.length; i++) {
+    const element = actorArray[i];
+console.log(element);
+    var key = element._id;
+    var label = element.name;
+    actorChoices[key] = label;
+  }
+
+
+  game.settings.register('___Genesys_Automation','TalentPack', {name:"Talent",scope:'world',type:String, choices: talentChoices,config:true,default:"NPC Talents", onChange:()=>{
+    var set =game.settings.get('___Genesys_Automation','TalentPack');
+    console.log(set);
+  }
+});
+game.settings.register('___Genesys_Automation','CustSkillPackage',{name:"Use Custom Skill Packages ?",scope:'world',type:Boolean,button:{label:"Hello",callback:()=>{}}, config:true,default:false,onChange:()=>{}})
+game.settings.register('___Genesys_Automation','CustSkillPackageStore',{name:"Use Custom Skill Packages ?",scope:'world',type:Array, config:false,default:[],onChange:()=>{
+  console.log(game.settings.get('___Genesys_Automation','CustSkillPackageStore'));
+}})
+game.settings.register('___Genesys_Automation','SkillList',{name:"Actor to Pull Skills",scope:'world',type:String, choices: actorChoices,config:true,onChange:()=>{
+}})
+})
+
+
 Hooks.on('getActorSheetHeaderButtons',(sheet, buttons)=>{
     const target = (sheet.actor);
     if (game.user.isGM) {
@@ -12,8 +48,10 @@ Hooks.on('getActorSheetHeaderButtons',(sheet, buttons)=>{
     }
 });
 
+var customSkillPackage = [];
 async function main(target){
-    const pack = game.packs.get("world.npc-talents");
+  var setPack =game.settings.get('___Genesys_Automation','TalentPack');
+  var pack = game.packs.get("world."+setPack+"");
     const Characs = [
         {
             "name": "Small Creature",
@@ -969,11 +1007,12 @@ async function main(target){
             }     
           }  
         ]
-
+    const customSkillArray = game.settings.get('___Genesys_Automation','CustSkillPackageStore');
     var page1Final = buildPage1();
     var page2Final = buildPage2();
     var page3Final = buildPage3();
     var page4Final = await buildPage4();
+    console.log(page3Final);
     var page5Final = buildPage5();
     
     const myDialogOptions = {
@@ -1006,9 +1045,13 @@ async function main(target){
                 }
               } else {console.log("No Defense Selected");}
                 nextDialogue("Skills",page3Final, (html)=>{
+                  if (game.settings.get('___Genesys_Automation','CustSkillPackage')) {
+                    var skillArray = customSkillArray;
+                  } else {var skillArray = Skills;}
                   if(typeof $(html).find(".skills:checkbox:checked")[0] != "undefined") {
                     var checkedID = $(html).find(".skills:checkbox:checked")[0].id;
-                    var selectedSkills = Skills.find(x=>x.id === checkedID);
+                    var selectedSkills = skillArray.find(x=>x.id === checkedID);
+                    console.log(selectedSkills);
                   } else {}
                     nextDialogue("Talents",page4Final, (html)=>{
                       if (typeof $(html).find(".talent:checkbox:checked")[0] != "undefined") {
@@ -1147,7 +1190,11 @@ async function main(target){
     function buildPage3() {
         var page = '';
         var i = 0;
-        for (var element of Skills) {
+        if (game.settings.get('___Genesys_Automation','CustSkillPackage') === true) {
+          var skills = customSkillArray;
+        } else {var skills = Skills;}
+        console.log(skills);
+        for (var element of skills) {
             element.id = "select-"+i+"";
           var keyDirty = Object.keys(element.skills);
           var valueDirty = Object.values(element.skills);
@@ -1175,7 +1222,8 @@ async function main(target){
     }
     
     async function buildPage4() {
-        var talents = game.packs.get("world.npc-talents").index.contents;
+      var setPack =game.settings.get('___Genesys_Automation','TalentPack');
+      var talents = game.packs.get("world."+setPack+"").index.contents;
         var page = '';
         var i = 0;
         for (var t = 0; t < talents.length; t++) {
@@ -1300,12 +1348,21 @@ async function main(target){
         }
       } else {console.log("No Def to update");}
     //Skills
+
+
     if (typeof selectedSkills != "undefined") {
+      console.log(selectedSkills);
     let skillKey = Object.keys(selectedSkills.skills);
+  console.log(skillKey);
     let skillValue = Object.values(selectedSkills.skills)
+    console.log(skillValue);
     for (let s = 0; s < skillKey.length; s++) {
-        var skillLoc = capitalizeFirstLetter(skillKey[s]);
-        target.update({[`data.attributes.${skillLoc}.value`]: skillValue[i]});
+      if (game.settings.get('___Genesys_Automation','CustSkillPackage')) {
+        var skillLoc = skillKey[s];
+      } else {
+        var skillLoc = capitalizeFirstLetter(skillKey[s]);}
+        console.log(skillLoc,skillValue[s]);
+        target.update({[`data.attributes.${skillLoc}.value`]: skillValue[s]});
     }
   } else {console.log("No skills to update");}
     
@@ -1328,6 +1385,7 @@ async function main(target){
   }
 /// Weps
 if (typeof selectedWepPack === "undefined"){
+  if (typeof custPackObj.equipment.weapons.weapon[0] === "undefined"){ }else
   var selectedWep = custPackObj.equipment.weapons;
 } else {
  var selectedWep = selectedWepPack.equipment.weapons;
@@ -1438,7 +1496,7 @@ const armData={
       }
     }
 
-    class Move{
+  class Move{
       
       static startExport() {
         var content = Move.exportPage();
@@ -1490,3 +1548,100 @@ const armData={
         }
       }
       window.Move=Move;
+      class skillArray {
+static skillArrayBuilder() {
+  var page = '';
+  var i = 0;
+  if (game.settings.get('___Genesys_Automation','CustSkillPackage') === true) {
+    var skills = game.settings.get('___Genesys_Automation','CustSkillPackageStore');
+  } else return;
+  for (var element of skills) {
+      element.id = "select-"+i+"";
+    var key = Object.keys(element.skills);
+    var value = Object.values(element.skills);
+    console.log(key);
+    console.log(value);
+    var tempSkill = '';
+    for (var j = 0; j < key.length; j++) {
+      var keyPos = ''+key[j]+': '+value[j]+',          ';
+      tempSkill = tempSkill + keyPos;
+    }
+      var pageAdd = `<tr><td>`+element.name+`</td><td>`+tempSkill+`</td></tr>`;
+     i++;
+      page = page + pageAdd;
+}
+var pageString = page.toString();
+
+  var actorId = game.settings.get('___Genesys_Automation','SkillList');
+  var actor = game.data.actors.find(x=>x._id === actorId);
+  var actorSkills = actor.data.skills;
+  var skills = Object.getOwnPropertyNames(actorSkills);
+var optionAdd =``;
+  for (let o = 0; o < skills.length; o++) {
+    var optionsSeg = `<option value="`+skills[o]+`">`+skills[o]+`</option>`;
+    optionAdd += optionsSeg;
+  }
+  console.log(optionAdd);
+  
+
+  var rows = '';
+  for (let r = 0; r < 5; r++) {
+    var optionRepeater = `<tr><td><select class="skillCust">`+optionAdd+`</select></td><td><input type="number" class="skillRank"></td></tr>`;
+    rows += optionRepeater;
+  }
+
+  var finalPage = `<table>
+  <tr><td>Name</td><td>Skills</td></tr>
+  `+pageString+`
+  </table>
+  <p>Name<input type="text" class="name"></p><table>`+rows+`
+  </table>`
+var skillPage = new Dialog({
+  title:"Skill Package Builder",
+  content: finalPage,
+  buttons: {
+    button1:{
+      label: "Import",
+      callback: (html)=>{
+        var name = $(html).find(".name").val();
+       var ids = $(html).find("select.skillCust").get().map(e => e.value);
+       var values = $(html).find(".skillRank").get().map(e => e.value);
+       console.log(name);
+       console.log(ids);
+       console.log(values);
+       var packToPush = {
+        "name": name,
+        "skills": {}};
+       for (let l = 0; l < ids.length; l++) {
+        const id = ids[l];
+        const value = parseInt(values[l]);
+         packToPush.skills[id] = value;
+       }
+       customSkillPackage.push(packToPush);
+       game.settings.set('___Genesys_Automation','CustSkillPackageStore',customSkillPackage);
+console.log(packToPush);
+setTimeout(()=>{skillArray.skillArrayBuilder();},100);
+    }
+  },
+  button2: {
+    label:"reset list",
+    callback: ()=>{
+      Dialog.confirm({
+        title: "List Reset",
+        content: "Are you sure you want to delete your list ?",
+        yes: () => {
+game.settings.set('___Genesys_Automation','CustSkillPackageStore',[]);
+customSkillPackage = [];
+setTimeout(()=>{skillArray.skillArrayBuilder();},100);
+        },
+        no: () => {ui.notifications.info("OK")
+        setTimeout(()=>{skillArray.skillArrayBuilder();},100);},
+        defaultYes: false
+      });
+    }
+  }
+  },render: html => console.log(html),}
+).render(true);
+  
+}}
+window.skillArray =skillArray;
