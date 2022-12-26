@@ -1,3 +1,4 @@
+
 Hooks.on('init',()=>{
   const compArray = game.data.packs;
   const talentChoices = {};
@@ -47,7 +48,6 @@ Hooks.on('getActorSheetHeaderButtons',(sheet, buttons)=>{
     });
     }
 });
-
 var customSkillPackage = [];
 async function main(target){
   var setPack =game.settings.get('___Genesys_Automation','TalentPack');
@@ -1603,6 +1603,9 @@ var skillPage = new Dialog({
     button1:{
       label: "Import",
       callback: (html)=>{
+        if (game.settings.get('___Genesys_Automation','CustSkillPackageStore').length > 0) {
+          customSkillPackage = game.settings.get('___Genesys_Automation','CustSkillPackageStore')
+        }
         var name = $(html).find(".name").val();
        var ids = $(html).find("select.skillCust").get().map(e => e.value);
        var values = $(html).find(".skillRank").get().map(e => e.value);
@@ -1615,7 +1618,9 @@ var skillPage = new Dialog({
        for (let l = 0; l < ids.length; l++) {
         const id = ids[l];
         const value = parseInt(values[l]);
+        if (value > 0) {
          packToPush.skills[id] = value;
+        }
        }
        customSkillPackage.push(packToPush);
        game.settings.set('___Genesys_Automation','CustSkillPackageStore',customSkillPackage);
@@ -1638,6 +1643,22 @@ setTimeout(()=>{skillArray.skillArrayBuilder();},100);
         setTimeout(()=>{skillArray.skillArrayBuilder();},100);},
         defaultYes: false
       });
+    }
+  },
+  button3: {
+    label:"export",
+    callback: ()=>{
+      localStorage.setItem("CustomSkillPackage", JSON.stringify(game.settings.get('___Genesys_Automation','CustSkillPackageStore')));
+      setTimeout(()=>{skillArray.skillArrayBuilder();},100);
+    }
+  },
+  button4: {
+    label:"retrieve",
+    callback: ()=>{
+      var temp = localStorage.getItem("CustomSkillPackage");
+      var jsonData = JSON.parse(temp);  
+      game.settings.set('___Genesys_Automation','CustSkillPackageStore',jsonData);
+      setTimeout(()=>{skillArray.skillArrayBuilder();},100);
     }
   }
   },render: html => console.log(html),}
