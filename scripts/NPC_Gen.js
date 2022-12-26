@@ -1347,100 +1347,7 @@ console.log(type);
   } else{
     console.log("no talents to update");
   }
-/// Weps
-if (typeof selectedWepPack === "undefined" && typeof cusPackObj === "undefined") {} else {
-if (typeof selectedWepPack === "undefined"){
-  var selectedWep = custPackObj.equipment.weapons;
-} else {
- var selectedWep = selectedWepPack.equipment.weapons;
-}
-for (let w = 0; w < selectedWep.length; w++) {
-  const element = selectedWep[w];
-  if (element.skill === "Brawl"|| element.skill === "Melee"){
-    var damage = 0;
-    var modDam = element.damage;
-  } else {
-  var damage = element.damage;
-  var modDam = 0;}
-  var range = capitalizeFirstLetter(element.range);
-  if (element.skill ==="Melee [Heavy]") {
-    var skill = "Melee";
-  } else if (element.skill ==="Melee [Light]") {
-    var skill = "Melee";
-  }else {var skill = element.skill}
-  
-const wepData={
-    name: element.weapon,
-    type: "weapon",
-    data: {
-      type: "weapon",
-          attributes: {
-            attr1666873111572: {
-              mod: "damage",
-              modtype: "Weapon Stat",
-              value: modDam
-            }
-          },
-          characteristic: {
-            value: "Brawn"
-          },
-          damage: {
-            abrev: "Dam",
-            value: damage,
-            type: "Number"
-          },
-          crit: {
-            value: element.critical
-          },
-          range: {
-            value: range
-          },
-          skill: {
-            value: skill
-          },
-          special: {
-            value: element.special
-          }
-        }}
 
-  
-  await target.createEmbeddedDocuments('Item', [wepData])
-  console.log(wepData);
-}
-
-if (typeof selectedWepPack === "undefined") {
-var selectedArm = custPackObj.equipment.armour;
-} else {
-  var selectedArm = selectedWepPack.equipment.armour;
-}
-for (let w = 0; w < selectedArm.length; w++) {
-  const element = selectedArm[w];
-  if (typeof element.defense.soak != "undefined") {
-    var armSoak = element.defense.soak;
-  }
-  if (typeof element.defense.melee != "undefined") {
-    var armMelee = element.defense.melee.value;
-  }
-  if (typeof element.defense.ranged != "undefined") {
-    var armRanged = element.defense.ranged.value;
-  }
-const armData={
-    name: element.name,
-    type: "armour",
-    data: {
-      soak: {value: armSoak,
-      type: "Number",
-      label: "Soak",
-      adjusted: armSoak
-    }
-    }
-}
-  if (typeof element.name != "undefined") {
-  await target.createEmbeddedDocuments('Item', [armData])}
-  console.log(armData);
-  
-}
-    }
     if (typeof selectedChar != "undefined") {
       // Attributes------------------------------------
       target.update({ "data.attributes.Brawn.value": selectedChar.characs.brawn });
@@ -1511,11 +1418,105 @@ const armData={
               }
             } else {}
 
+            /// Weps
+  if (typeof selectedWepPack === "undefined"){
+    var selectedWep = custPackObj.equipment.weapons;
+  } else {
+   var selectedWep = selectedWepPack.equipment.weapons;
+  }
+  for (let w = 0; w < selectedWep.length; w++) {
+    const element = selectedWep[w];
+    if (element.skill === "Brawl"|| element.skill === "Melee"){
+      var damage = 0;
+      var modDam = element.damage;
+    } else {
+    var damage = element.damage;
+    var modDam = 0;}
+    var range = capitalizeFirstLetter(element.range);
+    if (element.skill ==="Melee [Heavy]") {
+      var skill = "Melee";
+    } else if (element.skill ==="Melee [Light]") {
+      var skill = "Melee";
+    }else {var skill = element.skill}
+    
+  const wepData={
+      name: element.weapon,
+      type: "weapon",
+      data: {
+        type: "weapon",
+            attributes: {
+              attr1666873111572: {
+                mod: "damage",
+                modtype: "Weapon Stat",
+                value: modDam
+              }
+            },
+            characteristic: {
+              value: "Brawn"
+            },
+            damage: {
+              abrev: "Dam",
+              value: damage,
+              type: "Number"
+            },
+            crit: {
+              value: element.critical
+            },
+            range: {
+              value: range
+            },
+            skill: {
+              value: skill
+            },
+            special: {
+              value: element.special
+            }
+          }}
+  
+    
+    await target.createEmbeddedDocuments('Item', [wepData])
+    console.log(wepData);
+  }
+  
+  if (typeof selectedWepPack === "undefined") {
+  var selectedArm = custPackObj.equipment.armour;
+  } else {
+    var selectedArm = selectedWepPack.equipment.armour;
+  }
+  for (let w = 0; w < selectedArm.length; w++) {
+    const element = selectedArm[w];
+    if (typeof element.defense.soak != "undefined") {
+      var armSoak = element.defense.soak;
+    }
+    if (typeof element.defense.melee != "undefined") {
+      var armMelee = element.defense.melee.value;
+    }
+    if (typeof element.defense.ranged != "undefined") {
+      var armRanged = element.defense.ranged.value;
+    }
+  const armData={
+      name: element.name,
+      type: "armour",
+      data: {
+        soak: {value: armSoak,
+        type: "Number",
+        label: "Soak",
+        adjusted: armSoak
+      }
+      }
+  }
+    if (typeof element.name != "undefined") {
+    await target.createEmbeddedDocuments('Item', [armData])}
+    console.log(armData);
+    
+  }
+      }
+
     }
     function capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
       }
-    }
+  
 
   class Move{
       
