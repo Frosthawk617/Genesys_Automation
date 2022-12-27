@@ -1302,30 +1302,23 @@ console.log(type);
   console.log(skillKey);
     let skillValue = Object.values(selectedSkills.skills)
     console.log(skillValue);
-    if(type === 'minion') {var careertype = "talent"} else {var careertype= "career"}
-    var career = {
-      name: selectedSkills.name,
-      type: "talent",
-      data: {
-        attributes:{
-
-        }
-      }
-    }
     for (let s = 0; s < skillKey.length; s++) {
       if (game.settings.get('___Genesys_Automation','CustSkillPackage')) {
         var skillLoc = skillKey[s];
       } else {
         var skillLoc = capitalizeFirstLetter(skillKey[s]);}
         if (target.type==='minion') {
-        var group = $(document).find('input[name="data.skills.'+skillLoc+'.groupskill"]');
-        await group.click();
-       console.log(group);
+          var group = $(document).find('input[name="data.skills.'+skillLoc+'.groupskill"]');
+  if("checked" != group.checked){
+   await group.click();
+  }
         } else {
-        var car = $(document).find('input[name="data.skills.'+skillLoc+'.careerskill"]');
-        console.log(car);
-       await car.click();
-       await target.update({[`data.attributes.${skillLoc}.value`]: skillValue[s]});
+          var car = $(document).find('input[name="data.skills.'+skillLoc+'.careerskill"]');
+          if("checked" != car.checked){
+            console.log('checked');
+          await  car.click();
+          }
+        target.update({[`data.attributes.${skillLoc}.value`]: skillValue[s]});
         }
     }
   } else {console.log("No skills to update");}
@@ -1377,12 +1370,17 @@ console.log(type);
             } else {
                 var minorChar = "data.attributes.Wounds.value"
             }
-      target.update({[`${minorChar}`]: wound});
-      target.update({'data.attributes.Strain.value': strain});
+    await  target.update({[`${minorChar}`]: wound});
+    await  target.update({'data.attributes.Strain.value': strain});
             }
       
       
               if (typeof selectedDefArray != "undefined") {
+                if (target.data.type === "minion") {
+                  var minorChar = "data.unit_wounds.value"
+              } else {
+                  var minorChar = "data.attributes.Wounds.value"
+              }
               for (var y = 0; y < selectedDefArray.length; y++) {
               let key = Object.keys(selectedDefArray[y].defense);
               let value = Object.values(selectedDefArray[y].defense);
@@ -1391,33 +1389,33 @@ console.log(type);
                   switch (key[i]) {
                       case "wound threshold":
                           wound += value[i];
+                          console.log("triggered");
                           break;
                       case "strain threshold":
                           strain += value[i]
                           break;
                       case "soak":
-                          target.update({'data.attributes.Soak.value': value[i]});
+                          await target.update({'data.attributes.Soak.value': value[i]});
                           break;    
                       case "melee defense":
+                     await target.update({'data.attributes.Defence-Melee.value': value[i]});
                           break;    
                       case "ranged defense":
-                          target.update({'data.attributes.Defence-Ranged.value': value[i]});
+                       await target.update({'data.attributes.Defence-Ranged.value': value[i]});
                           break;    
                       default:
                           break;
                   }
-                  if (target.data.type === "minion") {
-                      var minorChar = "data.unit_wounds.value"
-                  } else {
-                      var minorChar = "data.attributes.Wounds.value"
-                  }
-          target.update({[`${minorChar}`]: wound});
-          target.update({'data.attributes.Strain.value': strain});
+                  console.log("triggered 2");
+                  console.log(wound);
+                 await target.update({[`${minorChar}`]: wound});
+                 await target.update({'data.attributes.Strain.value': strain});
+
+         
               }
           
               }
-            } else {}
-
+            } 
             /// Weps
   if (typeof selectedWepPack === "undefined"){
     var selectedWep = custPackObj.equipment.weapons;
