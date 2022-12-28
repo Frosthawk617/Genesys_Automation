@@ -25,8 +25,8 @@
 	"minimumCoreVersion": 9,
 	"socket": "true",
 	"compatibility": {
-		"minimum": 7,
-		"verified": 7,
+		"minimum": 9,
+		"verified": 9,
 		"maximum": 10
 	}
 }
