@@ -1077,6 +1077,9 @@ async function main(target, doc){
                             var custSpecial = $(html).find("#special").val();
                             var custArmName = $(html).find("#armName").val();
                             var custSoak = $(html).find("#soak").val();
+                            var custMeleeDef = $(html).find("#meleeDef").val();
+                            var custRangedDef = $(html).find("#rangedDef").val();
+
                             var custPackObj =            {
                               "name": custName,
                               "power_level": {
@@ -1100,7 +1103,9 @@ async function main(target, doc){
                                   {
                                       "name": custArmName,
                                       "defense": {
-                                          "soak": custSoak
+                                          "soak": custSoak,
+                                          "rangedDefense": custMeleeDef,
+                                          "meleeDefense": custRangedDef
                                       }
                                   }
                               ],
@@ -1270,8 +1275,8 @@ async function main(target, doc){
     var pageFinal = `
     <div>
     <table>
-    <tr><td>Custom</td><td>Weapon Name</td><td>Skill</td><td>Damage</td><td>Critical</td><td>Range</td><td>Special</td><td>Armor Name</td><td>Soak</td></tr>
-    <tr><td><input type="checkbox" name="" id="cust"></td><td><input type="text" id="wepName"></td><td><input type="text" id="skill"></td><td><input type="number" id="damage"></td><td><input type="number" id="crit"></td><td><select name="" id="range"><option value="engaged">Engaged</option><option value="Short">Short</option><option value="Medium">Medium</option><option value="Long">Long</option><option value="Extreme">Extreme</option></select></td><td><input type="text" id="special"></td><td><input type="text" id="armName"></td><td><input type="number" id="soak"></td></tr>
+    <tr><td>Custom</td><td>Weapon Name</td><td>Skill</td><td>Damage</td><td>Critical</td><td>Range</td><td>Special</td><td>Armor Name</td><td>Soak</td><td>Melee Defense</td><td>Ranged Defense</td></tr>
+    <tr><td><input type="checkbox" name="" id="cust"></td><td><input type="text" id="wepName"></td><td><input type="text" id="skill"></td><td><input type="number" id="damage"></td><td><input type="number" id="crit"></td><td><select name="" id="range"><option value="engaged">Engaged</option><option value="Short">Short</option><option value="Medium">Medium</option><option value="Long">Long</option><option value="Extreme">Extreme</option></select></td><td><input type="text" id="special"></td><td><input type="text" id="armName"></td><td><input type="number" id="soak"></td><td><input type="number" id="meleeDef"></td><td><input type="number" id="rangedDef"></td></tr>
     </table>
     <table>
 
@@ -1486,11 +1491,14 @@ console.log(type);
     if (typeof element.defense.soak != "undefined") {
       var armSoak = element.defense.soak;
     }
-    if (typeof element.defense.melee != "undefined") {
-      var armMelee = element.defense.melee.value;
+    if (element.defense.meleeDefense === element.defense.rangedDefense) {
+      var defense = element.defense.meleeDefense;
     }
-    if (typeof element.defense.ranged != "undefined") {
-      var armRanged = element.defense.ranged.value;
+    if (typeof element.defense.meleeDefense != "undefined") {
+      var armMelee = element.defense.meleeDefense;
+    }
+    if (typeof element.defense.rangedDefense != "undefined") {
+      var armRanged = element.defense.rangedDefense;
     }
   const armData={
       name: element.name,
@@ -1500,6 +1508,21 @@ console.log(type);
         type: "Number",
         label: "Soak",
         adjusted: armSoak
+      },
+      defence:{
+        value: defense
+      },
+      attributes:{
+        attr99999999129312:{
+          modtype:"Stat",
+          mod: "Defence-Melee",
+          value: armMelee
+        },    
+        attr99999999129317:{
+          modtype:"Stat",
+          mod: "Defence-Ranged",
+          value: armRanged
+        }    
       }
       }
   }
