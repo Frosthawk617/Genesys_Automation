@@ -30,7 +30,14 @@ function getPierceVal(special) {
   var substr = /Pierce(\<\/\w+\>|) (\d)/g;
   var valReg = /\d/g;
   var pierceString = special.match(substr)[0];
-  var pierce = pierceString.match(valReg)[0]; } else {
+  var pierce = pierceString.match(valReg)[0]; }
+   else if (special.includes('Breach')) {
+    var substr = /Breach(\<\/\w+\>|) (\d)/g;
+    var valReg = /\d/g;
+    var pierceString = special.match(substr)[0];
+    var pierce = pierceString.match(valReg)[0];
+    pierce = pierce * 10;
+  } else {
     pierce = 0;
   }
   return pierce;
