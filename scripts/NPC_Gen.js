@@ -1321,7 +1321,7 @@ console.log(type);
             console.log('checked');
           await  car.click();
           }
-        target.update({[`data.attributes.${skillLoc}.value`]: skillValue[s]});
+       await target.update({[`data.attributes.${skillLoc}.value`]: skillValue[s]});
         }
     }
   } else {console.log("No skills to update");}
