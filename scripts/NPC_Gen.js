@@ -1064,11 +1064,11 @@ async function main(target, doc){
                         }
                       }
                         nextDialogue("Weapon Packs", page5Final, (html)=>{
-                          var checkCust = $(html).find(".cust:checkbox:checked")[0];
+                          var checkCust = $(html).find("#cust:checkbox:checked")[0];
                           if (typeof $(html).find(".wepcust:checkbox:checked")[0] != "undefined") {
                           var checkedID = $(html).find(".wepcust:checkbox:checked")[0].id;
                           var selectedWepPack = WepPacks.find(x=>x.id === checkedID);
-                          } else {
+                          } else if(typeof checkCust != "undefined") {
                             var custName = $(html).find("#wepName").val();
                             var custSkill = $(html).find("#skill").val();
                             var custDmg = $(html).find("#damage").val();
@@ -1279,7 +1279,6 @@ async function main(target, doc){
     <tr><td><input type="checkbox" name="" id="cust"></td><td><input type="text" id="wepName"></td><td><input type="text" id="skill"></td><td><input type="number" id="damage"></td><td><input type="number" id="crit"></td><td><select name="" id="range"><option value="engaged">Engaged</option><option value="Short">Short</option><option value="Medium">Medium</option><option value="Long">Long</option><option value="Extreme">Extreme</option></select></td><td><input type="text" id="special"></td><td><input type="text" id="armName"></td><td><input type="number" id="soak"></td><td><input type="number" id="meleeDef"></td><td><input type="number" id="rangedDef"></td></tr>
     </table>
     <table>
-
     `+pageString+`
     </table>
         </div>
@@ -1299,7 +1298,7 @@ async function main(target, doc){
     
     async function updateActor(selectedChar, selectedDefArray, selectedSkills, type, talentIds, selectedWepPack, custPackObj){
 console.log(type);
-
+debugger;
     //Skills
     if (typeof selectedSkills != "undefined") {
       console.log(selectedSkills);
@@ -1337,8 +1336,6 @@ console.log(type);
     const doc = await pack.getDocument(id);
     const data = game.items.fromCompendium(doc);
     await target.createEmbeddedDocuments('Item', [data]);
-
-
  
 
 }
@@ -1422,6 +1419,7 @@ console.log(type);
               }
             } 
             /// Weps
+            if (typeof selectedWepPack != "undefined" || typeof custPackObj != "undefined" ) {
   if (typeof selectedWepPack === "undefined"){
     var selectedWep = custPackObj.equipment.weapons;
   } else {
@@ -1476,10 +1474,10 @@ console.log(type);
             }
           }}
   
-    
     await target.createEmbeddedDocuments('Item', [wepData])
     console.log(wepData);
-  }
+  
+}
   
   if (typeof selectedWepPack === "undefined") {
   var selectedArm = custPackObj.equipment.armour;
@@ -1526,11 +1524,11 @@ console.log(type);
       }
       }
   }
-    if (typeof element.name != "undefined") {
-    await target.createEmbeddedDocuments('Item', [armData])}
+    await target.createEmbeddedDocuments('Item', [armData])
     console.log(armData);
     
   }
+            }
       }
 
     }
