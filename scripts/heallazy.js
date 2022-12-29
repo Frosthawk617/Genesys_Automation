@@ -17,6 +17,7 @@ Hooks.on('renderChatMessage',(event)=>{
     }
     var message = target.data.name + " has been healed for " + toHeal + " wounds and " + strainTakenHuh + event.roll.ffg.advantage + " strain by " + event.data.speaker.alias;
     updateTarget(target, finalWound, finalStrain);
+    game.user.updateTokenTargets([]);
     ChatMessage.create({
       content: message
   })

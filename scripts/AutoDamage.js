@@ -61,8 +61,11 @@ function getRollDetails(target, soak, wounds, pierce) {
         });
         applyDamage(target, finalWounds);
         Hooks.off("createChatMessage", dmg);
+        game.user.updateTokenTargets([]);
       },
-      no: () => {ui.notifications.info("Pick the right target next time....")},
+      no: () => {ui.notifications.info("Pick the right target next time....")
+      game.user.updateTokenTargets([]);
+    },
       defaultYes: false
     });
 
