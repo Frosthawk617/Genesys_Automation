@@ -1298,7 +1298,6 @@ async function main(target, doc){
     
     async function updateActor(selectedChar, selectedDefArray, selectedSkills, type, talentIds, selectedWepPack, custPackObj){
 console.log(type);
-debugger;
     //Skills
     if (typeof selectedSkills != "undefined") {
       console.log(selectedSkills);
